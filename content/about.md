@@ -1,7 +1,7 @@
 ---
 title: "About"
 date:  2024-01-27T18:46:33-05:00
-draft: true
+draft: false
 comments: false
 images: ["bg/cohen.jpg"]
 ---
