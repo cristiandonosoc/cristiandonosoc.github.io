@@ -1,7 +1,7 @@
 ---
 title: "Hello_world"
 date: 2024-01-27T19:52:52-05:00
-draft: true
+draft: false
 toc: false
 images: ["bg/cohen.jpg"]
 tags:
