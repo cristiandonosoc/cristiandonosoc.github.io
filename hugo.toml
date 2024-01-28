@@ -1,3 +1,109 @@
-baseURL = 'https://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+# To see what each config does, refer to https://1bl4z3r.github.io/hermit-V2/en/posts/explaining-configs/
+
+baseURL = "http://localhost"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = true
+theme = "hermit-v2"
+
+#[languages]
+#  [languages.en]
+#    title = 'CHANGE ME'
+#    [languages.en.params]
+#      homeSubtitle = "CHANGE ME"
+#    weight = 1
+#  [languages.fr]
+#    title = 'CHANGE ME(FR)'
+#    [languages.fr.params]
+#      homeSubtitle = "CHANGE ME"
+#    weight = 2
+#  [languages.it]
+#    title = 'CHANGE ME(IT)'
+#    [languages.it.params]
+#      homeSubtitle = "CHANGE ME"
+#    weight = 3
+
+languageCode = "en-us"
+
+title = "Sign the treaty baby!"
+# enableGitInfo = true
+
+pygmentsCodefences  = true
+pygmentsUseClasses  = true
+#hasCJKLanguage = true
+
+rssLimit = 10
+
+copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."
+enableEmoji = true
+
+# googleAnalytics = "UA-123-45"
+# disqusShortname = "CHANGE ME"
+
+[params.author]
+  name = "Cristián Donoso"
+  about = "CHANGE SITE AUTHOR ABOUT"
+
+[blackfriday]
+  # hrefTargetBlank = true
+  # noreferrerLinks = true
+  # nofollowLinks = true
+
+[taxonomies]
+  tag = "tags"
+  # Categories are disabled by default.
+  # category = "categories"
+
+[params]
+  dateform        = "Jan 2, 2006"
+  dateformShort   = "Jan 2"
+  dateformNum     = "2006-01-02"
+  dateformNumTime = "2006-01-02 15:04 -0700"
+
+  # description = "CHANGE ME SITE DESCRIPTION"
+  # images = [""]
+  themeColor = "#494f5c"
+
+  #homeSubtitle = "CHANGE ME HOME SUBTITLE"
+  footerCopyright = ' <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
+  # bgImg = ""
+  # gitUrl = "https://github.com/1bl4z3r/hermit-V2/tree/staging"
+
+  justifyContent = false
+
+  relatedPosts = true
+  code_copy_button = true
+
+  homeSubtitlePrinter = true
+  scrollToTop = true
+  global_mathjax = false
+  readTime = true
+  readTimeSeparator = "CHANGE ME READ TIME"
+  # legacyLayout = false
+  shareSocial = true
+  # googleTagManager = "GTM-XXXXXXXX"
+  # tagSymbol = "#"
+  # categorySymbol = "⊲"
+
+  # [[params.socialLinks]]
+  #   name = "mastodon"
+  #   url = "https://joinmastodon.org/"
+
+  # [[params.socialLinks]]
+  #   name = "x"
+  #   url = "https://twitter.com/"
+
+  [[params.socialLinks]]
+    name = "github"
+    url = "https://github.com/cristiandonosoc"
+
+[menu]
+
+  [[menu.main]]
+    name = "Posts"
+    url = "posts/"
+    weight = 10
+
+  [[menu.main]]
+    name = "About"
+    url = "about/"
+    weight = 20
