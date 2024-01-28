@@ -24,7 +24,7 @@ theme = "hermit-v2"
 
 languageCode = "en-us"
 
-title = "Sign the treaty baby!"
+title = "CDC's Blog "
 # enableGitInfo = true
 
 pygmentsCodefences  = true
@@ -59,11 +59,11 @@ enableEmoji = true
   dateformNum     = "2006-01-02"
   dateformNumTime = "2006-01-02 15:04 -0700"
 
-  # description = "CHANGE ME SITE DESCRIPTION"
+  description = "This is the personal blog of Cristián Donoso"
   # images = [""]
   themeColor = "#494f5c"
 
-  #homeSubtitle = "CHANGE ME HOME SUBTITLE"
+  homeSubtitle = "Sign the treaty, baby!"
   footerCopyright = ' <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
   # bgImg = ""
   # gitUrl = "https://github.com/1bl4z3r/hermit-V2/tree/staging"
