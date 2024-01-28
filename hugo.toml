@@ -1,9 +1,9 @@
 # To see what each config does, refer to https://1bl4z3r.github.io/hermit-V2/en/posts/explaining-configs/
 
-baseURL = "http://localhost"
+baseURL = "https://cristiandonosoc.github.io"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = true
-theme = "hermit-v2"
+theme = "hermit-v2-cristiandonosoc"
 
 #[languages]
 #  [languages.en]
@@ -97,7 +97,6 @@ enableEmoji = true
     url = "https://github.com/cristiandonosoc"
 
 [menu]
-
   [[menu.main]]
     name = "Posts"
     url = "posts/"
