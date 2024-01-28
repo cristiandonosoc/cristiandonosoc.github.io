@@ -1,0 +1,3 @@
+#home-subtitle {
+    animation: typing 1.5s steps({{ strings.RuneCount .Site.Params.homeSubtitle }}, end),blink-caret .75s linear 5.1s infinite;
+}

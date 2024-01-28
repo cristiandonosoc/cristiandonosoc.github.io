@@ -18,11 +18,3 @@ I have worn many hats in my career: Rails webdev, worked on a circuit simulation
 worked on Google Cloud, Fuchsia and Stadia @ [Google](https://www.google.com/), before landing at my current role.
 
 Current interests: Game & Engine Development, (Neo)Vim, Golang.
-
-
-
-
-
-
-
-
