@@ -2,7 +2,7 @@
 title: "Working on multiple Go repos locally with Bazel"
 date: 2024-02-17T14:59:44-05:00
 draft: false
-toc: false
+toc: true
 images:
 tags:
   - bazel
@@ -37,7 +37,7 @@ github.com/cristiandonosoc/common_lib
   -> github.com/cristiandonosoc/second_project
 ```
 
-# Native Go
+## Native Go
 
 Turns out that separating a go module into two is not that straightforward because there is a
 chicken and egg thing. Most likely you will require initial set of changes in **both** the original
@@ -75,7 +75,7 @@ do the correct thing and being able to find the code. Now you can iterate locall
 and when you're done, you can submit `common_lib` and then remove the replace statement to make Go
 find the actual published code.
 
-# Bazel & Gazelle
+## Bazel & Gazelle
 
 I've found that everything I want to do with normal Go takes 10x the time with Gazelle. The whole
 experience is riddled with weird errors and frustration. I do not enjoy it.

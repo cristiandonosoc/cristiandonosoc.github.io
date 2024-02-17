@@ -2,10 +2,10 @@
 title: "Admonition Shortcode"
 slug : "admonition-shortcode"
 date: 2023-10-20T20:06:06+05:30
-draft: false
+draft: true
 featuredImg: ""
 description : 'This explains admonition shortcode implementation'
-tags: 
+tags:
   - Demo
   - Typography
 author : 1bl4z3r

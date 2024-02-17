@@ -2,10 +2,10 @@
 title: "Explaining Configs"
 slug : "explaining-configs"
 date: 2023-10-22T20:06:06+05:30
-draft: false
+draft: true
 featuredImg: ""
 description : "The Hitchhiker's Guide to Hermit - V2 Configuration"
-tags: 
+tags:
   - Demo
 scrolltotop : true
 toc : true
@@ -68,7 +68,7 @@ Lastmod : 2023-10-28T20:30:30+05:30
 	- `[menu]` : Display menu items in Homepage as well as in menubar. To make more menu items, use [[menu.main]]
 
 ## Configuration in page Frontmatter
-  
+
   As described in Hugo docs
 
   > Front matter allows you to keep metadata attached to an instance of a content type—i.e., embedded inside a content file—and is one of the many features that gives Hugo its strength.
@@ -105,7 +105,7 @@ If `ShowLastmod` is not provided. User response defaults to false. It is equival
 
 ### LaTeX
 
-LaTeX is implemented through Mathjax. 
+LaTeX is implemented through Mathjax.
   - If you are using this theme as a proper  mathematical blog, enable `global_mathjax` to true in hugo.toml. It will enable Mathjax support site wide.
   - Since Mathjax is a heavy script (>1 MB), it is not ideal to run Mathjax site wide, especially if you are in the above cohort. However, if you want to use mathematical formulas, you can set `mathjax : true` in Page frontmatter. It will enable mathjax for only that page only.
 

@@ -1,5 +1,6 @@
 +++
 title = "Getting Started with Hugo"
+draft = true
 tags = [
     "go",
     "golang",

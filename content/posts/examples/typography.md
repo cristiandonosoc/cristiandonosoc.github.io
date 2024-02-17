@@ -2,10 +2,10 @@
 title: "Typography"
 slug : 'typography'
 date: 2023-07-22T14:36:33+05:30
-draft: false
+draft: true
 featuredImg: ""
 description : 'Integer lobortis vulputate mauris quis maximus. Vestibulum ac eros porttitor, auctor sem sed, tincidunt nulla. In sit amet tincidunt ex.'
-tags: 
+tags:
   - Demo
   - Typography
 
