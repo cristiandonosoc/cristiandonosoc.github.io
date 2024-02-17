@@ -2,10 +2,10 @@
 title: "MathJax Support Demo"
 slug : 'mathjax-support'
 date: 2023-08-18T14:07:33+05:30
-draft: false
+draft: true
 featuredImg: ""
 description : 'This page demos MathJax support, nothing else'
-tags: 
+tags:
   - Demo
   - Typography
 author : 1bl4z3r
@@ -75,7 +75,7 @@ You can invoke partial in following ways:
 
 I have consciously decoupled main javascript from Mathjax javascript, so that you may visualize if there is any load latency, given mathjax JS is huge. I have minified it, but still if you get any better optimizations, let me know.
 
-> The MathJax library version (at the time of publising this article) is : 3.2.2. 
+> The MathJax library version (at the time of publising this article) is : 3.2.2.
 >> It includes components : tex-mml-svg.
 
 ### The Quadratic Formula
@@ -125,7 +125,7 @@ $$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$
 
 ### A complex equation
 
-\begin{equation} 
+\begin{equation}
 S (ω)=1.466\, H_s^2 \,  \frac{ω_0^5}{ω^6 }  \, e^[-3^ { ω/(ω_0  )]^2}
 \end{equation}
 

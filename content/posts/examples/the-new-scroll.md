@@ -2,10 +2,10 @@
 title: "The New Scroll"
 slug : 'the-new-scroll'
 date: 2023-08-06T16:07:33+05:30
-draft: false
+draft: true
 featuredImg: ""
 description : 'A button to return to the top of the page allows the user to quickly return to the top of the page without making too much effort'
-tags: 
+tags:
   - Demo
   - Typography
 scrolltotop : true
