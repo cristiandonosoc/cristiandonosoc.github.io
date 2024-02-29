@@ -30,7 +30,6 @@ ERROR: Analysis of target '//cmd/gochart:gochart' failed; build aborted:
 INFO: Elapsed time: 0.419s
 INFO: 0 processes.
 ERROR: Couldn't start the build. Unable to run tests
-INFO: Streaming build results to: https://app.buildbuddy.io/invocation/310b3dc7-4bed-44d2-9ddf-67bd929fa002
 FAILED: Build did NOT complete successfully (24 packages loaded, 237 targets configured)
 ```
 
