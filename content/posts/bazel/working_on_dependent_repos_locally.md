@@ -26,12 +26,12 @@ from some packages that reside in the `internal` packages of the first project. 
 packages to deal with files, common utilities, that sort of stuff.
 
 So the use case would look a little like the following. From this module:
-```
+```bash
 github.com/cristiandonosoc/initial_project
 ```
 
 I would like to be able to arrive at something like the following:
-```
+```bash
 github.com/cristiandonosoc/common_lib
   -> github.com/cristiandonosoc/initial_project
   -> github.com/cristiandonosoc/second_project
