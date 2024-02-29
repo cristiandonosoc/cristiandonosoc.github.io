@@ -36,7 +36,7 @@ rssLimit = 10
 copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."
 enableEmoji = true
 
-# googleAnalytics = "UA-123-45"
+googleAnalytics = "G-Q24FSYKCTV"
 # disqusShortname = "CHANGE ME"
 
 [params.author]
