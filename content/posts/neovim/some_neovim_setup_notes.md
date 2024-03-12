@@ -12,13 +12,13 @@ I have been using Vim for over a decade now. Using Vim bindings is second-nature
 refuse to program on an editor/tool that does not have Vim bindings. I also get grumpy when the Vim
 emulation on those tools doesn't work quite right. Rider is the latest thing to annoy me.
 
-But throughout those time, I have used a relative vanilla statement. Like everyone else, I had a
+But throughout those times, I have used a relative vanilla Vim config. Like everyone else, I had a
 .vimrc that I have accumulated over time, building some idiosyncrasies along the way. Some things
 about my setup that are relative uncommon:
 
 - I use "," as my leader.
 - In normal mode, I mapped <space> to search (basically like pressing '/').
-- Since as long as I remember, in normal mode I use <tab> to format the file (eg. invoke gofmt).
+- Since as long as I remember, in normal mode I use `<tab>` to format the file (eg. invoke gofmt).
 
 ... and so and so forth.
 
@@ -33,7 +33,7 @@ I have been using Neovim for a while, but really I was using the same as Vim. I 
 .vimrc. I really changed because of the integrated terminal, as I am a heavy terminal user.
 
 But this year that changed as I tool the plunge and I went full Neovim by creating a native setup,
-to get all the goodies that the native Neovim ecosystem marketed to such. So over the course of
+to get all the goodies that the native Neovim ecosystem marketed so much. So over the course of
 several days, in my spare time I went through pretty much all of this great
 [Neovim from Scratch](https://www.youtube.com/playlist?list=PLhoH5vyxr6Qq41NFL4GvhFp-WLd5xzIzZ)
 series and got myself a pretty decent setup. For the most part it does more stuff that I had in my
@@ -66,5 +66,8 @@ Main file: https://github.com/cristiandonosoc/environment/blob/main/nvim/lua/use
 about any completions per se, but rather sources are hooked and nvim-cmp will show them accordingly.
 
 Main file: https://github.com/cristiandonosoc/environment/blob/main/nvim/lua/user/cmp.lua
+
+
+Native Neovim LSP client: https://neovim.io/doc/user/lsp.html
 
 
