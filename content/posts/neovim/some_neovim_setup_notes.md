@@ -18,8 +18,9 @@ But throughout those times, I have used a relative vanilla Vim config. Like ever
 about my setup that are relative uncommon:
 
 - I use "," as my leader.
-- In normal mode, I mapped <space> to search (basically like pressing '/').
+- In normal mode, I mapped `<space>` to search (basically like pressing '/').
 - Since as long as I remember, in normal mode I use `<tab>` to format the file (eg. invoke gofmt).
+- This is not _strictly_ a Vim thing, but **of course** I map caps-lock to be `<escape>`.
 
 ... and so and so forth.
 
