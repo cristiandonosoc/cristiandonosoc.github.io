@@ -3,7 +3,7 @@ title: "Working on multiple Go repos locally with Bazel"
 date: 2024-02-17T14:59:44-05:00
 draft: false
 toc: true
-images:
+images: ["bg/cohen.jpg"]
 tags:
   - bazel
   - go

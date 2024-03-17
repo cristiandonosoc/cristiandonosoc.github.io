@@ -1,9 +1,9 @@
 ---
 title: "Some Neovim Setup Notes"
-date: 2024-03-05T20:22:12-05:00
+date: 2024-03-17T01:22:12-05:00
 draft: false
 toc: true
-images:
+images: ["bg/cohen.jpg"]
 tags:
   - neovim
 ---

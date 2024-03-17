@@ -3,7 +3,7 @@ title: "Gazelle Unexpected Module Loading"
 date: 2024-02-28T20:44:38-05:00
 draft: false
 toc: false
-images:
+images: ["bg/cohen.jpg"]
 tags:
   - bazel
   - go
