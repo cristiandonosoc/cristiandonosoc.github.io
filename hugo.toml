@@ -22,6 +22,11 @@ theme = "hermit-v2-cristiandonosoc"
 #      homeSubtitle = "CHANGE ME"
 #    weight = 3
 
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+	  unsafe = true
+
 languageCode = "en-us"
 
 title = "CDC's Blog "
