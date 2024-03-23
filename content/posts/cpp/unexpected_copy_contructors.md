@@ -1,7 +1,7 @@
 ---
 title: "Unexpected Copy Contructors on MSVC"
 date: 2024-03-23T11:41:38-04:00
-draft: true
+draft: false
 toc: true
 images: ["bg/cohen.jpg"]
 tags:
