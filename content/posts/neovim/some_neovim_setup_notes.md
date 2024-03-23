@@ -9,9 +9,9 @@ tags:
 ---
 
 I have been using Vim for over a decade now. Using Vim bindings is second-nature to me now and I
-refuse to program on an editor/tool that does not have Vim bindings. I also get grumpy when the Vim
-emulation on those tools doesn't work quite right. For the most part they do OK with the bindings,
-but most fail miserably with more advanced stuff such as Macros. Rider, I'm looking at you.
+_refuse_ to program on an editor/tool that does not have Vim bindings. I also get grumpy when the
+Vim emulation on those tools doesn't work quite right. For the most part they do OK with the
+bindings, but most fail miserably with more advanced stuff such as macros. Rider, I'm looking at you.
 
 But throughout those times, I have used a relative vanilla Vim config. Like everyone else, I had a
 .vimrc that I have accumulated over time, building some idiosyncrasies along the way. Some things
