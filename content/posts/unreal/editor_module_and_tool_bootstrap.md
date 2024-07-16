@@ -30,12 +30,6 @@ work so that next tools are easy to integrate:
 
 ## Editor Modules
 
-In order to modify the editor, we need to hook ourselves to the "Editor" side of Unreal, rather than
-the runtime one, which is what is normally done. The typical way to do this is to create an Editor
-module. Editor modules have two important properties: Unreal understand them as editor code, which
-permits us to do all kinds of interesting things and also, this code will not be compiled in client
-builds.
-
 ### Unreal Software Architecture (Quick) Primer
 
 {{<admonition tip>}}
