@@ -1,7 +1,7 @@
 ---
 title: "Bazel Target Specific Options"
 date: 2025-02-23T19:42:28-05:00
-draft: true
+draft: false
 toc: false
 images:
 tags:
