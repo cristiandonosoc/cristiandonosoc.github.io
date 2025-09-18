@@ -8,11 +8,11 @@ tags:
   - cpp
 ---
 
-When watching the interview to [Billy Basso (Animal Well) on the Wookash Podcast](https://www.youtube.com/watch?v=YngwUu4bXR4), he mentioned that he relied a lot of [X macros](en.wikipedia.org/wiki/X_macro) to
-generate code for his project. That got me interested and led to discover a pattern to which I've
-come to rely a lot in my latest personal coding. I'm happy with the results for now, but with the
-caveat that I've used it on a small (but non trivial) personal project in which I'm the sole
-programmer for now.
+When watching the interview to [Billy Basso (Animal Well) on the Wookash Podcast](https://www.youtube.com/watch?v=YngwUu4bXR4),
+he mentioned that he relied a lot of [X macros](https://en.wikipedia.org/wiki/X_macro) to generate code for
+his project. That got me interested and led to discover a pattern to which I've come to rely a lot
+in my latest personal coding. I'm happy with the results for now, but with the caveat that I've used
+it on a small (but non trivial) personal project in which I'm the sole programmer for now.
 
 Basically, X macros are a preprocessor macro that defines a table-like format of data. This macro
 receives *another* macro as an input, which is then called which each row of data as an input.
