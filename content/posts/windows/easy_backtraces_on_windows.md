@@ -1,5 +1,5 @@
 ---
-title: "Easy_backtraces_on_windows"
+title: "Easy Stack Traces on Windows"
 date: 2025-03-30T20:03:52-04:00
 draft: false
 toc: false
