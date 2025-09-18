@@ -8,11 +8,11 @@ tags:
   - cpp
 ---
 
-When watching the interview to [Billy Basso (Animal Well) on the Wookash Podcast](https://www.youtube.com/watch?v=YngwUu4bXR4), he mentioned that he relied a lot of [X macros](en.wikipedia.org/wiki/X_macro) to
-generate code for his project. That got me interested and led to discover a pattern to which I've
-come to rely a lot in my latest personal coding. I'm happy with the results for now, but with the
-caveat that I've used it on a small (but non trivial) personal project in which I'm the sole
-programmer for now.
+When watching the interview to [Billy Basso (Animal Well) on the Wookash Podcast](https://www.youtube.com/watch?v=YngwUu4bXR4),
+he mentioned that he relied a lot of [X macros](https://en.wikipedia.org/wiki/X_macro) to generate code for
+his project. That got me interested and led to discover a pattern to which I've come to rely a lot
+in my latest personal coding. I'm happy with the results for now, but with the caveat that I've used
+it on a small (but non trivial) personal project in which I'm the sole programmer for now.
 
 Basically, X macros are a preprocessor macro that defines a table-like format of data. This macro
 receives *another* macro as an input, which is then called which each row of data as an input.
@@ -113,7 +113,7 @@ const char* ToString(EEntityType entity_type);
 // Entity.cpp
 
 const char* ToString(EEntityType entity_type) {
-    // Define the X macro that will generate the case of the enu,
+    // Define the X macro that will generate the case of the enum,
 #define X(ENUM_NAME, ...) case EEntityType::ENUM_NAME: return #ENUM_NAME;
 
     // Call it as part of a switch case.
@@ -190,10 +190,10 @@ And with this we generated the following code, that will be in sync with the enu
 
 ```cpp
 struct EntityManager {
-    std::array<Player, 2> PlayerEntities;
-    std::array<Enemy, 256> EnemyEntities;
-    std::array<Projectile, 1024> ProjectileEntities;
-    std::array<Building, 32> BuildingEntities;
+    std::array<PlayerEntity, 2> PlayerEntities;
+    std::array<EnemyEntity, 256> EnemyEntities;
+    std::array<ProjectileEntity, 1024> ProjectileEntities;
+    std::array<BuildingEntity, 32> BuildingEntities;
 };
 ```
 
@@ -239,9 +239,9 @@ class EntityManager {
 
     // Or we can generate a specific function for all of them!
     // This will generate GetPlayerEntity, GetEnemyEntity, etc.
-#define X(ENUM_NAME, STRUCT_NAME, ...)              \
-    STRUCT_NAME* Get##ENUM_NAME##Entity(EntityID id)    \
-        return (STRUCT_NAME*)GetEntityOpaque(id);      \
+#define X(ENUM_NAME, STRUCT_NAME, ...)                  \
+    STRUCT_NAME* Get##ENUM_NAME##Entity(EntityID id) {  \
+        return (STRUCT_NAME*)GetEntityOpaque(id);       \
     }
 #undef X
 
@@ -275,7 +275,7 @@ void* EntityManager::GetEntityOpaque(EntityID id) {
 #define X(ENUM_NAME, STRUCT_NAME, ...) \
     case EEntityType::ENUM_NAME: return &ENUM_NAME##Entities[id.GetIndex()];
 
-    switch (entity_type) {
+    switch (id.GetType()) {
         ENTITY_TYPES(X)
         case EEntityType::Invalid:
             ASSERT(false);
