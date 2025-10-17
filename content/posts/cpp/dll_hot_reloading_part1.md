@@ -6,7 +6,6 @@ toc: true
 images:
 tags:
   - cpp
-  - SDL3
 ---
 
 A long, long time ago, when watching [Handmade Hero](https://hero.handmade.network/), somewhere in
@@ -284,11 +283,27 @@ bootstrap program listen to the dll file, constantly checking it for changes. On
 change, it can unload the current dll instance, reload the new one and call into it again. And
 that's it: Hot code reloading! The process can be repeated any number of times.
 
+Basically the steps are:
+1. Copy the original DLL into a created temporary location.
+2. Load that DLL, leaving the original one untouched.
+3. Listens for changes on the original DLL.
+4. On change, make a new copy into *another* temporary location.
+5. Unload the first DLL.
+6. Load the second DLL.
+7. Start calling into the newly loaded.
+
 TODO INSERT IMAGE
 
 ## Devil in the details
 
-The overview above is true, but there are a lot of details that are critical to consider:
+The overview above is true, but there are a lot of details that are critical to consider, which I
+will talk in my next post, since why they do not change the flow, they are quite important.
+Basically:
+
+- Code architecture to aid with the process.
+- Memory lifetime management.
+- Global variable lifetime management.
+- Some tips on handling with compilers/file timing.
 
 ### DLL management
 
