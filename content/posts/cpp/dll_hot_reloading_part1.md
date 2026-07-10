@@ -13,15 +13,15 @@ the first 10-20 or so episodes, Casey shows how to do code hot reloading. That i
 program running, change your code, recompile and have the application immediatelly pick up the
 changes.
 
-{{<admonition note>}}
-Unreal has something similar with Live++. But that is not the same thing. Live++ is a much more
-sophisticated, black magic approach than the one described here.
-{{</admonition>}}
-
 Until that time, I always thought it was some voodoo, dark magic that was beyond the comprehension
-of mere mortals like me. I was right (somewhat) on the first part, but not on the second. And while
+of mere mortals. I was right (somewhat) on the first part, but not on the second. And while
 I have been using the  technique successfully for the longest part, there are still some edge
-corners that I've yet to master.
+corners that I've came to grok better just recently.
+
+{{<admonition note>}}
+If you've used Unreal, you may have used Live++ (which is not an Unreal exclusive thing btw).
+Live++ is **NOT** the same thing. It is a much more , black magic approach than the one described here.
+{{</admonition>}}
 
 ## The Setup
 
@@ -29,10 +29,15 @@ To better comprehend the technique, it's important to have a bit of understandin
 libraries work and are loaded by OS. I will use the Windows/DLL nomenclature, but the process is
 relatively similar on Linux.
 
+{{<admonition note>}}
+I don't think I'm too off the mark, but I will _butcher_ the technical nomenclature.
+{{</admonition>}}
+
+
 When programs are compiled, the code is divided into modules (or libraries). One module will be the
-program itself, where the `main` function is. But outside specific environments, like embedded
-systems, no program is complete by itself. It requires other "external" code for it to function,
-some provided by third party libraries (eg. SDL, Boost, etc.) and other comes from the OS.
+program itself, where the `main` entrypoint is. But normally no program is complete by itself. It
+requires other "external" code for it to function, some provided by third party libraries
+(eg. SDL, Boost, etc.) and other comes from the OS.
 
 When a program is being compiled, it has to declare which libraries it needs. This is sometimes
 referred as "compiling or linking against" that library, the latter being more correct. Linking to a
@@ -42,7 +47,7 @@ library can be done statically or dynamically.
 
 Static linking means that the compiled code of that library will be "bundled in" the main program.
 Outside from some metadata, from the point of view of the OS, it's as if that code was written for
-that program all along.
+that program all along. As in, you had the source.
 
 This doesn't mean that the static library is compiled at the same time as the program, though it
 often is. In either way, the compiler needs the headers and either the source or the precompiled
@@ -54,19 +59,28 @@ Dynamic linking is different in the sense that instead of bundling the code in, 
 "stubs" for the functions and symbols needed when using the library, and associated metadata to
 track. The idea is that this library will be loaded _at runtime (dynamically)_, and the stubs
 completed then. At compile time, the compiler needs the headers and some symbol metadata to be to
-correctly create the stubs, but it does not need the generated code.On runtime, the OS will find the
-shared libraries and fill those stubs.
+correctly create the stubs, but it does not need the generated code. Later, at runtime, the OS will
+find the shared libraries and fill those stubs.
 
 A separate compilation step, which does not (and normally is not) done in the same machine/time,
-creates the shared library: the actual .dll file). They hold a lot of data, but in a gist they are
-the machine instructions, data pages (precompiled  read-only data, like tables, would go in there),
-plus a lot of metadata.
+creates the shared library: the actual .dll file. They hold a lot of data, but in a gist they are
+the machine instructions, data pages (precompiled read-only data, like tables, strings, would go in
+there), plus a lot of metadata.
 
-The most relevant for the dynamic linking, in the case of DLLs, are the `Export Directory`, in which
-there is a `Export Address Table`. In a gist, it is a table that maps function names to `Relative
-Virtual Addresses`. These are fancy names for offsets from a known location, normally what would be
-the load address of the shared library. This is needed because the library does not know where it
-will be loaded in memory, so the best it can do is to have an offset that can be "patched" later on.
+The most relevant metadata for the dynamic linking, in the case of DLLs, are the `Export Directory`,
+in which there is a `Export Address Table`. In a gist, it is a table that maps function names to
+`Relative Virtual Addresses`. These are fancy names for offsets from a known location, normally what
+would be the load address of the shared library. This is needed because the library does not know
+where it will be loaded in memory, so the best it can do is to have an offset that can be "patched"
+later on.
+
+TODO(cdc): Show offset
+
+### Static vs Linking
+
+There are pros and cons to each approach. Dynamic linking used to be much more important, because of
+limited system memory available, meaning that having each process holds copies of libraries was too
+expensive. But now we have an insane amount of memory available.
 
 {{<admonition note>}}
 This idea is fairly old (at least 70s), and it comes from optimizations when memory was much more
@@ -74,18 +88,18 @@ limited. So instead of each process having a copy of the same library in memory,
 refer to the same one and be shared.
 {{</admonition>}}
 
-### Static vs Linking
+TODO(cdc): Add shared library diagram
 
-There are pros and cons to each approach, though one big driver for shared libraries, limited
-memory, is no longer a big concern. So in many environments, like cloud computing, they compile
-everything statically since it's much less error prone to have one big executable rather than
-making sure that all the dynamic libraries are correctly deployed.
+Actually in many environments, like cloud computing, they compile everything statically since it's
+much less error prone to have one big executable rather than making sure that all the dynamic
+libraries are correctly deployed. Otherwise you run the risk of a program running well on a machine
+and then not on another because they have different versions of a shared library.
 
 Having said the above, OSes use dynamic libraries **A LOT**. You can see which modules are loaded on a
 process by using a debugger. As an example, these are the loaded modules for a simple, yet
 non-trivial program:
 
-The format of the list is:
+In windows, you can get The format of the list is:
 
 `(DLL Name, DLL filepath, Mapped Address Begin, Mapped Address End, Associated PDB file, PDB Load result)`
 
@@ -212,7 +226,7 @@ library, it roughly goes through the following steps:
     The OS has specific paths and conventions to where to look for these files and in what order.
     There are mechanism to instruct the OS where to find (like LD_LIBRARY_PATH on Linux).
 
-    Not finding this file will fail the start of the program. Windows will issue an image like this:
+    Not finding these dlls will fail the start of the program. Windows will issue an image like this:
 
     {{<figure src="images/posts/dll_not_found.png" >}}
 
@@ -220,12 +234,15 @@ library, it roughly goes through the following steps:
 
     Here it will also do the matching between the symbols imported (needed) by the program and the
     ones. If it cannot not, this is where you get the corrupted error. Normally this happens when
-    there is a mismatch of versions (aka. you have an old .dll). But on Linux is very common to
-    have very old system libraries (aka. trying to run your program in too old a Linux version).
+    there is a mismatch of versions (ie. you have an old .dll). On Linux is very common to
+    have very old system libraries, so maybe your gcclib (C runtime) is too old.
 
 3. Maps code section into the address space of the process.
 
    These pages will be most likely be marked as read-only, executable memory pages.
+   This is where the memory savings come from. Since most programs reuse a lot of system libraries,
+   the OS can load them once into memory and simply map those memory pages into your process, thus
+   having one copy of them in resident memory, regardless of how many processes it is running.
 
 4. Perform the relocations:
 
@@ -255,11 +272,11 @@ If I can, I use a library like SDL, that provides an OS-agnostic call to load th
 {{</admonition>}}
 
 Once we have the library loaded, we can perform queries into it, again using functionality exposed
-by the OS.
-On Windows, the function is [GetProcAddress](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress)
+by the OS. On Windows, the function is [GetProcAddress](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress)
 (or [SDL_LoadFunction](https://wiki.libsdl.org/SDL3/SDL_LoadFunction)). This returns the pointer to
 the function associated with that name. If you know the function signature, you can cast that
 function pointer and call in into the library.
+
 
 {{<admonition note>}}
 See how we get the function name by string? This is where the `export "C"` nonsense comes from.
@@ -270,93 +287,13 @@ just say to the C++ compiler: for the following functions, don't do your normal 
 the C names so we can query them in sane manner.
 {{</admonition>}}
 
-## Hot code reloading!
-
-Now we have all the pieces to do hot code reloading. The main trick is to "split" your program into
-two pieces: a bootstrap program and the "app dll". The bootstrap program is the actual `main`
-executable you run, which knows where the app dll is (this can be as simple as receiving the path as
-a cli argument). The job of this exe is then to initialize stuff, load the dll and call into it.
-Most of the actual app logic is in the dll.
-
-Then to do the "hot reload", we simply make the
-bootstrap program listen to the dll file, constantly checking it for changes. Once it detects a
-change, it can unload the current dll instance, reload the new one and call into it again. And
-that's it: Hot code reloading! The process can be repeated any number of times.
-
-Basically the steps are:
-1. Copy the original DLL into a created temporary location.
-2. Load that DLL, leaving the original one untouched.
-3. Listens for changes on the original DLL.
-4. On change, make a new copy into *another* temporary location.
-5. Unload the first DLL.
-6. Load the second DLL.
-7. Start calling into the newly loaded.
-
-TODO INSERT IMAGE
-
-## Devil in the details
-
-The overview above is true, but there are a lot of details that are critical to consider, which I
-will talk in my next post, since why they do not change the flow, they are quite important.
-Basically:
-
-- Code architecture to aid with the process.
-- Memory lifetime management.
-- Global variable lifetime management.
-- Some tips on handling with compilers/file timing.
-
-### DLL management
-
-The approach above of listening to the DLL, loading and unloading is not an OS utility, it must be
-done by you. And there are a ton of details to make it work reliably.
-
-1. DLL being locked.
-
-    This is a Windows specific thing, but if a DLL is loaded on a program, the .dll file cannot be
-    changed. Meaning that any recompilation will fail to write into that file.
-
-    How is the compiler to write the new version? An approach is to make to make your build
-    system/process generate a new filepath each time, but I find that a wrong approach, since your
-    build system should not care/be aware that you're doing dynamic library shenanigans.
-
-    I prefer to have my app, when loading the .dll, **copy that dll into a generated location and
-    load that one instead**. This leaves the original .dll untouched and free for a next build. It
-    also frees our program to do whatever it wants with them, since it is the creator/owner if these
-    files.
-
-    A gist of what I do in my own code is something like this:
-
-```cpp
-bool InitialGameLibraryLoad(PlatformState* ps, ...) {
-    ...
-    std::string new_path = std::format("{}\\test_{:%y%m%d_%H%M%S}.dll",
-                                       temp_path.Str(),
-                                       std::chrono::system_clock::now());
-
-    // Copy the library to the new location.
-    if (!SDL_CopyFile(ps->GameLibrary.Path.Str(), ps->GameLibrary.TargetLoadPath.Str())) {
-        return false;
-    }
-
-    if (!LoadGameLibrary(ps)) {
-        SDL_Log("ERROR: Re-loading game library");
-        return false;
-    }
-
-    return true;
-}
-```
-
 {{<admonition note>}}
-Note that this is where the `test_251013_190732.dll` comes from! I likely should name it better,
-but the rest is just the timestamp of when the copy is done. This ensures that I will not have
-collisions when generating a new one.
+These is a whole story here about ABI (Application Binary Interface). Since we are calling function
+pointers, we assume that they were compiled with the same convention. You cannot load a DLL compiled
+with GCC and expect it to work with a program compiled with MSVC. Even though both are valid Windows
+programs, they do not use registers in the same way, thus the arguments one side uses will not match
+the expectations of the other.
 {{</admonition>}}
-
-    This leaves the DLL open for rebuilding. Now the app simply has to contantly check for changes
-    on that file and repeat the process. The only thing that changes is that before we load the
-    library, we need to unload the first.
-
 
 
 

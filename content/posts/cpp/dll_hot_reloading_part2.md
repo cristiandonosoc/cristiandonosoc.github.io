@@ -12,6 +12,97 @@ tags:
 In the previous post I did an overview of the process of the hot code reloading, but in this post
 I'm going to go into some important details about how to architect and make the technique work.
 
+## Hot code reloading!
+
+Now we have all the pieces to do hot code reloading. The main trick is to "split" your program into
+two pieces: a bootstrap program and the "app dll". The bootstrap program is the actual `main`
+executable you run, which knows where the app dll is (this can be as simple as receiving the path as
+a cli argument). The job of this exe is then to initialize stuff, load the dll and call into it.
+Most of the actual app logic is in the dll.
+
+Then to do the "hot reload", we simply make the
+bootstrap program listen to the dll file, constantly checking it for changes. Once it detects a
+change, it can unload the current dll instance, reload the new one and call into it again. And
+that's it: Hot code reloading! The process can be repeated any number of times.
+
+Basically the steps are:
+1. Copy the original DLL into a created temporary location.
+2. Load that DLL, leaving the original one untouched.
+3. Listens for changes on the original DLL.
+4. On change, make a new copy into *another* temporary location.
+5. Unload the first DLL.
+6. Load the second DLL.
+7. Start calling into the newly loaded.
+
+TODO INSERT IMAGE
+
+## Devil in the details
+
+The overview above is true, but there are a lot of details that are critical to consider, which I
+will talk in my next post, since why they do not change the flow, they are quite important.
+Basically:
+
+- Code architecture to aid with the process.
+- Memory lifetime management.
+- Global variable lifetime management.
+- Some tips on handling with compilers/file timing.
+
+### DLL management
+
+The approach above of listening to the DLL, loading and unloading is not an OS utility, it must be
+done by you. And there are a ton of details to make it work reliably.
+
+1. DLL being locked.
+
+    This is a Windows specific thing, but if a DLL is loaded on a program, the .dll file cannot be
+    changed. Meaning that any recompilation will fail to write into that file.
+
+    How is the compiler to write the new version? An approach is to make to make your build
+    system/process generate a new filepath each time, but I find that a wrong approach, since your
+    build system should not care/be aware that you're doing dynamic library shenanigans.
+
+    I prefer to have my app, when loading the .dll, **copy that dll into a generated location and
+    load that one instead**. This leaves the original .dll untouched and free for a next build. It
+    also frees our program to do whatever it wants with them, since it is the creator/owner if these
+    files.
+
+    A gist of what I do in my own code is something like this:
+
+```cpp
+bool InitialGameLibraryLoad(PlatformState* ps, ...) {
+    ...
+    std::string new_path = std::format("{}\\test_{:%y%m%d_%H%M%S}.dll",
+                                       temp_path.Str(),
+                                       std::chrono::system_clock::now());
+
+    // Copy the library to the new location.
+    if (!SDL_CopyFile(ps->GameLibrary.Path.Str(), ps->GameLibrary.TargetLoadPath.Str())) {
+        return false;
+    }
+
+    if (!LoadGameLibrary(ps)) {
+        SDL_Log("ERROR: Re-loading game library");
+        return false;
+    }
+
+    return true;
+}
+```
+
+{{<admonition note>}}
+Note that this is where the `test_251013_190732.dll` comes from! I likely should name it better,
+but the rest is just the timestamp of when the copy is done. This ensures that I will not have
+collisions when generating a new one.
+{{</admonition>}}
+
+    This leaves the DLL open for rebuilding. Now the app simply has to contantly check for changes
+    on that file and repeat the process. The only thing that changes is that before we load the
+    library, we need to unload the first.
+
+
+
+
+
 ## Architecting the code
 
 In the previous post I went over how the "main app calls the DLL", but didn't really specify how
