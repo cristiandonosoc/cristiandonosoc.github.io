@@ -1,46 +1,48 @@
 ---
 title: "Shared Library Hot Reloading (Part 1)"
-date: 2025-10-13T14:40:57-04:00
-draft: true
+date: 2026-07-12T14:40:57-04:00
+draft: false
 toc: true
-images:
+images: ["bg/cohen.jpg"]
 tags:
   - cpp
 ---
 
 A long, long time ago, when watching [Handmade Hero](https://hero.handmade.network/), somewhere in
 the first 10-20 or so episodes, Casey shows how to do code hot reloading. That is, having your
-program running, change your code, recompile and have the application immediatelly pick up the
+program running, change your code, recompile and have the application immediately pick up the
 changes.
 
 Until that time, I always thought it was some voodoo, dark magic that was beyond the comprehension
 of mere mortals. I was right (somewhat) on the first part, but not on the second. And while
-I have been using the  technique successfully for the longest part, there are still some edge
-corners that I've came to grok better just recently.
+I have been using the technique successfully for the longest time, there are still some edge
+corners that I've come to grok better just recently.
 
 {{<admonition note>}}
-If you've used Unreal, you may have used Live++ (which is not an Unreal exclusive thing btw).
-Live++ is **NOT** the same thing. It is a much more , black magic approach than the one described here.
+If you've used Unreal, you may have used [Live++](https://liveplusplus.tech/) (which is not an
+Unreal exclusive thing btw). Live++ is **NOT** the same thing. It is a much more sophisticated,
+impressive and black magic feat than the one described here.
 {{</admonition>}}
 
 ## The Setup
 
 To better comprehend the technique, it's important to have a bit of understanding about how shared
-libraries work and are loaded by OS. I will use the Windows/DLL nomenclature, but the process is
+libraries work and are loaded by the OS. I will use the Windows/DLL nomenclature, but the process is
 relatively similar on Linux.
 
 {{<admonition note>}}
 I don't think I'm too off the mark, but I will _butcher_ the technical nomenclature.
+For example, here I use the term _dynamic_ and _shared_ libraries pretty interchangeably.
 {{</admonition>}}
 
 
 When programs are compiled, the code is divided into modules (or libraries). One module will be the
-program itself, where the `main` entrypoint is. But normally no program is complete by itself. It
-requires other "external" code for it to function, some provided by third party libraries
-(eg. SDL, Boost, etc.) and other comes from the OS.
+program itself, where the `main` entrypoint is. But very few programs are complete by themselves. They
+require other "external" code for them to function, some provided by third party libraries
+(eg. SDL, Boost, etc.) and others come from the OS (ntdll, winapi, etc.).
 
 When a program is being compiled, it has to declare which libraries it needs. This is sometimes
-referred as "compiling or linking against" that library, the latter being more correct. Linking to a
+referred to as "compiling or linking against" that library, the latter being more correct. Linking to a
 library can be done statically or dynamically.
 
 ### Static Linking
@@ -50,36 +52,42 @@ Outside from some metadata, from the point of view of the OS, it's as if that co
 that program all along. As in, you had the source.
 
 This doesn't mean that the static library is compiled at the same time as the program, though it
-often is. In either way, the compiler needs the headers and either the source or the precompiled
+often is. Many projects decide to "vendor" the source of their third party libraries and compile
+them. But you can also download the precompiled libraries. In either way, the compiler needs the
+headers (so that your code can understand what to call) and either the source or the precompiled
 library at the moment of compilation, otherwise it cannot "bundle it in".
+
+{{<figure src="images/posts/dynamic_linking/static_link.png" >}}
 
 ### Dynamic Linking
 
 Dynamic linking is different in the sense that instead of bundling the code in, the compiler creates
 "stubs" for the functions and symbols needed when using the library, and associated metadata to
-track. The idea is that this library will be loaded _at runtime (dynamically)_, and the stubs
-completed then. At compile time, the compiler needs the headers and some symbol metadata to be to
+track them. The idea is that this library will be loaded _at runtime (dynamically)_, and the stubs
+are completed then. At compile time, the compiler needs the headers and some symbol metadata to
 correctly create the stubs, but it does not need the generated code. Later, at runtime, the OS will
 find the shared libraries and fill those stubs.
 
-A separate compilation step, which does not (and normally is not) done in the same machine/time,
-creates the shared library: the actual .dll file. They hold a lot of data, but in a gist they are
-the machine instructions, data pages (precompiled read-only data, like tables, strings, would go in
-there), plus a lot of metadata.
+{{<figure src="images/posts/dynamic_linking/dynamic_link.png" >}}
+
+A separate compilation step, which does not happen (and normally isn't) on the same machine or at
+the same time, creates the shared library: the actual .dll file. They hold a lot of data, but in a
+nutshell they are the machine instructions, data pages (precompiled read-only data, like tables,
+strings, would go in there), plus a lot of metadata.
 
 The most relevant metadata for the dynamic linking, in the case of DLLs, are the `Export Directory`,
-in which there is a `Export Address Table`. In a gist, it is a table that maps function names to
+in which there is an `Export Address Table`. In a nutshell, it is a table that maps function names to
 `Relative Virtual Addresses`. These are fancy names for offsets from a known location, normally what
 would be the load address of the shared library. This is needed because the library does not know
 where it will be loaded in memory, so the best it can do is to have an offset that can be "patched"
 later on.
 
-TODO(cdc): Show offset
+{{<figure src="images/posts/dynamic_linking/function_patching.png" >}}
 
-### Static vs Linking
+### Static vs Dynamic Linking
 
 There are pros and cons to each approach. Dynamic linking used to be much more important, because of
-limited system memory available, meaning that having each process holds copies of libraries was too
+limited system memory available, meaning that having each process hold copies of libraries was too
 expensive. But now we have an insane amount of memory available.
 
 {{<admonition note>}}
@@ -88,24 +96,26 @@ limited. So instead of each process having a copy of the same library in memory,
 refer to the same one and be shared.
 {{</admonition>}}
 
-TODO(cdc): Add shared library diagram
+{{<figure src="images/posts/dynamic_linking/code_reshare.png" >}}
 
 Actually in many environments, like cloud computing, they compile everything statically since it's
 much less error prone to have one big executable rather than making sure that all the dynamic
 libraries are correctly deployed. Otherwise you run the risk of a program running well on a machine
 and then not on another because they have different versions of a shared library.
 
+## In practice
+
 Having said the above, OSes use dynamic libraries **A LOT**. You can see which modules are loaded on a
 process by using a debugger. As an example, these are the loaded modules for a simple, yet
 non-trivial program:
 
-In windows, you can get The format of the list is:
-
-`(DLL Name, DLL filepath, Mapped Address Begin, Mapped Address End, Associated PDB file, PDB Load result)`
+Using Windows as an example:
 
 {{<admonition important>}}
-No need to read the list, this is just to show how many they are.
+No need to read the list, this is just to show how many they are. There were about 100 entries.
 {{</admonition>}}
+
+`(DLL Name, DLL filepath, Mapped Address Begin, Mapped Address End, Associated PDB file, PDB Load result)`
 
 ```text
 advapi32.dll,C:\Windows\System32\advapi32.dll,7FFC5D0A0000,7FFC5D152000,advapi32.pdb,PdbFail
@@ -116,74 +126,7 @@ cfgmgr32.dll,C:\Windows\System32\cfgmgr32.dll,7FFC5A0D0000,7FFC5A127000,cfgmgr32
 clbcatq.dll,C:\Windows\System32\clbcatq.dll,7FFC5C4F0000,7FFC5C598000,CLBCatQ.pdb,PdbFail
 combase.dll,C:\Windows\System32\combase.dll,7FFC5BF40000,7FFC5C2C4000,combase.pdb,PdbFail
 CoreMessaging.dll,C:\Windows\System32\CoreMessaging.dll,7FFC56C20000,7FFC56D46000,CoreMessaging.pdb,PdbFail
-CoreUIComponents.dll,C:\Windows\System32\CoreUIComponents.dll,7FFC53920000,7FFC53C03000,CoreUIComponents.pdb,PdbFail
-crypt32.dll,C:\Windows\System32\crypt32.dll,7FFC5A520000,7FFC5A697000,crypt32.pdb,PdbFail
-cryptbase.dll,C:\Windows\System32\cryptbase.dll,7FFC59B80000,7FFC59B8C000,cryptbase.pdb,PdbFail
-cryptnet.dll,C:\Windows\System32\cryptnet.dll,7FFC52B70000,7FFC52BAB000,cryptnet.pdb,PdbFail
-cryptsp.dll,C:\Windows\System32\cryptsp.dll,7FFC59B90000,7FFC59BAC000,cryptsp.pdb,PdbFail
-DataExchange.dll,C:\Windows\System32\DataExchange.dll,7FFC1C540000,7FFC1C59A000,DataExchange.pdb,PdbFail
-dbghelp.dll,C:\Windows\System32\dbghelp.dll,7FFC57C80000,7FFC57EC1000,dbghelp.pdb,PdbFail
-devobj.dll,C:\Windows\System32\devobj.dll,7FFC5A130000,7FFC5A15D000,devobj.pdb,PdbFail
-directxdatabasehelper.dll,C:\Windows\System32\directxdatabasehelper.dll,7FFC57540000,7FFC575A0000,directxdatabasehelper.pdb,PdbFail
-drvstore.dll,C:\Windows\System32\drvstore.dll,7FFC529F0000,7FFC52B6C000,drvstore.pdb,PdbFail
-dwmapi.dll,C:\Windows\System32\dwmapi.dll,7FFC575D0000,7FFC57606000,dwmapi.pdb,PdbFail
-DXCore.dll,C:\Windows\System32\DXCore.dll,7FFC57620000,7FFC57667000,DXCore.pdb,PdbFail
-dxgi.dll,C:\Windows\System32\dxgi.dll,7FFC572B0000,7FFC573E3000,dxgi.pdb,PdbFail
-gdi32.dll,C:\Windows\System32\gdi32.dll,7FFC5B120000,7FFC5B14B000,gdi32.pdb,PdbFail
-gdi32full.dll,C:\Windows\System32\gdi32full.dll,7FFC5A6A0000,7FFC5A7D2000,gdi32full.pdb,PdbFail
-glew32.dll,C:\Users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windows-dbg\bin\kandinsky\glew32.dll,6D610000,6D68B000,C:\Users\Nigel Stewart\Downloads\glew-2.2.0\glew-2.2.0\bin\Release\x64\glew32.pdb,PdbFail
-glu32.dll,C:\Windows\System32\glu32.dll,7FFBCA3A0000,7FFBCA3CD000,glu32.pdb,PdbFail
-gpapi.dll,C:\Windows\System32\gpapi.dll,7FFC59950000,7FFC59977000,gpapi.pdb,PdbFail
-imagehlp.dll,C:\Windows\System32\imagehlp.dll,7FFC5CCA0000,7FFC5CCC0000,imagehlp.pdb,PdbFail
-imm32.dll,C:\Windows\System32\imm32.dll,7FFC5B980000,7FFC5B9B0000,imm32.pdb,PdbFail
-kernel.appcore.dll,C:\Windows\System32\kernel.appcore.dll,7FFC59370000,7FFC5938A000,Kernel.Appcore.pdb,PdbFail
-kernel32.dll,C:\Windows\System32\kernel32.dll,7FFC5C750000,7FFC5C819000,kernel32.pdb,PdbFail
-KernelBase.dll,C:\Windows\System32\KernelBase.dll,7FFC5AB00000,7FFC5AECC000,kernelbase.pdb,PdbFail
-main.exe,C:\Users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windows-dbg\bin\kandinsky\main.exe,7FF775820000,7FF776AD4000,C:\users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windows-dbg\bin\kandinsky\main.pdb,PdbLoaded
-msasn1.dll,C:\Windows\System32\msasn1.dll,7FFC59CA0000,7FFC59CB3000,msasn1.pdb,PdbFail
-mscms.dll,C:\Windows\System32\mscms.dll,7FFC53410000,7FFC534D8000,mscms.pdb,PdbFail
-msctf.dll,C:\Windows\System32\msctf.dll,7FFC5CF30000,7FFC5D08F000,msctf.pdb,PdbFail
-msvcp140.dll,C:\Windows\System32\msvcp140.dll,7FFC32F50000,7FFC32FDD000,D:\a\_work\1\s\binaries\amd64ret\bin\amd64\\msvcp140.amd64.pdb,PdbFail
-msvcp140d.dll,C:\Windows\System32\msvcp140d.dll,7FFC4E100000,7FFC4E1E1000,D:\a\_work\1\s\binaries\amd64ret\bin\amd64\\msvcp140d.amd64.pdb,PdbFail
-msvcp_win.dll,C:\Windows\System32\msvcp_win.dll,7FFC5A990000,7FFC5AA33000,msvcp_win.pdb,PdbFail
-msvcrt.dll,C:\Windows\System32\msvcrt.dll,7FFC5D210000,7FFC5D2B9000,msvcrt.pdb,PdbFail
-ntdll.dll,C:\Windows\System32\ntdll.dll,7FFC5D300000,7FFC5D566000,ntdll.pdb,PdbFail
-ntmarta.dll,C:\Windows\System32\ntmarta.dll,7FFC59490000,7FFC594C5000,ntmarta.pdb,PdbFail
-nvgpucomp64.dll,C:\Windows\System32\DriverStore\FileRepository\nvlt.inf_amd64_aadc33586c05acfa\nvgpucomp64.dll,7FFC4FF70000,7FFC5215E000,nvgpucomp64.pdb,PdbFail
-nvoglv64.dll,C:\Windows\System32\DriverStore\FileRepository\nvlt.inf_amd64_aadc33586c05acfa\nvoglv64.dll,7FFB9F310000,7FFBA1F00000,nvoglv64.pdb,PdbFail
-nvspcap64.dll,C:\Windows\System32\nvspcap64.dll,7FFC1B690000,7FFC1B961000,C:\dvs\p4\build\sw\rel\gfclient\rel_03_27\shadowplay2\proxy\win7_amd64_release\nvspcap64.pdb,PdbFail
-ole32.dll,C:\Windows\System32\ole32.dll,7FFC5C830000,7FFC5C9CF000,ole32.pdb,PdbFail
-oleacc.dll,C:\Windows\System32\oleacc.dll,7FFC28D20000,7FFC28D9D000,oleacc.pdb,PdbFail
-oleaut32.dll,C:\Windows\System32\oleaut32.dll,7FFC5B9C0000,7FFC5BAA0000,oleaut32.pdb,PdbFail
-opengl32.dll,C:\Windows\System32\opengl32.dll,7FFBCA760000,7FFBCA86C000,opengl32.pdb,PdbFail
-powrprof.dll,C:\Windows\System32\powrprof.dll,7FFC590C0000,7FFC5911E000,powrprof.pdb,PdbFail
-profapi.dll,C:\Windows\System32\profapi.dll,7FFC5A3A0000,7FFC5A3CF000,profapi.pdb,PdbFail
-rpcrt4.dll,C:\Windows\System32\rpcrt4.dll,7FFC5C5A0000,7FFC5C6B6000,rpcrt4.pdb,PdbFail
-rsaenh.dll,C:\Windows\System32\rsaenh.dll,7FFC592D0000,7FFC5930A000,rsaenh.pdb,PdbFail
-SDL3.dll,C:\Users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windows-dbg\bin\kandinsky\SDL3.dll,7FFBFB620000,7FFBFB877000,C:\temp\SDL3-3.2.2\VisualC\SDL\x64\Release\SDL3.pdb,PdbFail
-sechost.dll,C:\Windows\System32\sechost.dll,7FFC5CBF0000,7FFC5CC96000,sechost.pdb,PdbFail
-setupapi.dll,C:\Windows\System32\setupapi.dll,7FFC5BAB0000,7FFC5BF36000,setupapi.pdb,PdbFail
-SHCore.dll,C:\Windows\System32\SHCore.dll,7FFC5B880000,7FFC5B96F000,shcore.pdb,PdbFail
-shell32.dll,C:\Windows\System32\shell32.dll,7FFC5B150000,7FFC5B87D000,shell32.pdb,PdbFail
-shlwapi.dll,C:\Windows\System32\shlwapi.dll,7FFC5C6C0000,7FFC5C729000,shlwapi.pdb,PdbFail
-test_251013_190732.0574755.dll,C:\cdc\projects\kandinsky\temp\game_dlls\test_251013_190732.0574755.dll,7FFBF10C0000,7FFBF1359000,C:\users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windows-dbg\bin\apps\std\std_shared.pdb,PdbLoaded
-TextInputFramework.dll,C:\Windows\System32\TextInputFramework.dll,7FFC31AC0000,7FFC31C0D000,TextInputFramework.pdb,PdbFail
-threadpoolwinrt.dll,C:\Windows\System32\threadpoolwinrt.dll,7FFC20950000,7FFC20966000,threadpoolwinrt.pdb,PdbFail
-twinapi.appcore.dll,C:\Windows\System32\twinapi.appcore.dll,7FFC4D350000,7FFC4D58C000,twinapi.appcore.pdb,PdbFail
-ucrtbase.dll,C:\Windows\System32\ucrtbase.dll,7FFC5AED0000,7FFC5B01B000,ucrtbase.pdb,PdbFail
-ucrtbased.dll,C:\Windows\System32\ucrtbased.dll,7FFC29C80000,7FFC29E9F000,ucrtbased.pdb,PdbFail
-UIAutomationCore.dll,C:\Windows\System32\UIAutomationCore.dll,7FFC1E9D0000,7FFC1EE04000,UIAutomationCore.pdb,PdbFail
-umpdc.dll,C:\Windows\System32\umpdc.dll,7FFC590A0000,7FFC590B4000,UMPDC.pdb,PdbFail
-user32.dll,C:\Windows\System32\user32.dll,7FFC5C2D0000,7FFC5C49A000,user32.pdb,PdbFail
-uxtheme.dll,C:\Windows\System32\uxtheme.dll,7FFC571F0000,7FFC5729F000,uxtheme.pdb,PdbFail
-vcruntime140.dll,C:\Windows\System32\vcruntime140.dll,7FFC357F0000,7FFC3580E000,D:\a\_work\1\s\binaries\amd64ret\bin\amd64\\vcruntime140.amd64.pdb,PdbFail
-vcruntime140_1.dll,C:\Windows\System32\vcruntime140_1.dll,7FFC35A60000,7FFC35A6C000,D:\a\_work\1\s\binaries\amd64ret\bin\amd64\\vcruntime140_1.amd64.pdb,PdbFail
-vcruntime140_1d.dll,C:\Windows\System32\vcruntime140_1d.dll,7FFC54A30000,7FFC54A3F000,D:\a\_work\1\s\binaries\amd64ret\bin\amd64\\vcruntime140_1d.amd64.pdb,PdbFail
-vcruntime140d.dll,C:\Windows\System32\vcruntime140d.dll,7FFC4E020000,7FFC4E04E000,D:\a\_work\1\s\binaries\amd64ret\bin\amd64\\vcruntime140d.amd64.pdb,PdbFail
-version.dll,C:\Windows\System32\version.dll,7FFC52BB0000,7FFC52BBB000,version.pdb,PdbFail
-win32u.dll,C:\Windows\System32\win32u.dll,7FFC5A960000,7FFC5A987000,win32u.pdb,PdbFail
-Windows.StateRepositoryCore.dll,C:\Windows\System32\Windows.StateRepositoryCore.dll,7FFC3E8E0000,7FFC3E8FA000,Windows.S tateRepositoryCore.pdb,PdbFail
-windows.storage.dll,C:\Windows\System32\windows.storage.dll,7FFC580E0000,7FFC58936000,Windows.Storage.pdb,PdbFail
+... (<truncated>)
 winmm.dll,C:\Windows\System32\winmm.dll,7FFC46830000,7FFC46866000,winmm.pdb,PdbFail
 winsta.dll,C:\Windows\System32\winsta.dll,7FFC58BF0000,7FFC58C57000,winsta.pdb,PdbFail
 wintrust.dll,C:\Windows\System32\wintrust.dll,7FFC5A490000,7FFC5A510000,wintrust.pdb,PdbFail
@@ -193,7 +136,8 @@ wtsapi32.dll,C:\Windows\System32\wtsapi32.dll,7FFC56F00000,7FFC56F16000,wtsapi32
 ```
 
 Most of them are Windows libraries (note how the debug symbols are not there :sad:). Actually, from
-all the nonsense, only the following are "my code":
+all the nonsense, only the following are introduced by me explicitly. All others are injected by
+Windows:
 
 ```text
 assimp.dll,C:\Users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windows-dbg\bin\kandinsky\assimp.dll,7FFB9BBF0000,7FFB9C40A000,,NoPdb
@@ -203,13 +147,13 @@ SDL3.dll,C:\Users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windo
 test_251013_190732.0574755.dll,C:\cdc\projects\kandinsky\temp\game_dlls\test_251013_190732.0574755.dll,7FFBF10C0000,7FFBF1359000,C:\users\crist\_bazel_crist\3m6uftxs\execroot\_main\bazel-out\x64_windows-dbg\bin\apps\std\std_shared.pdb,PdbLoaded
 ```
 
-Two of them are written by me (main.exe and test_251013_190732.dll), while the other are
+Two of them are written by me (main.exe and test_251013_190732.dll), while the others are
 dependencies.
 
 {{<admonition note>}}
-Note how the PDB (debug symbols) path is *hardcoded* into the entries, to the point that glew32.dll
-has `C:\Users\Nigel Steward\...` in the path, because that is where the pdb was at the moment of
-compiling the shared library (thus creating the metadata).
+Note how the PDB (debug symbols) path is *hardcoded* into the entries. This is the path of the dll
+when it was originally compiled. To the point that glew32.dll has `C:\Users\Nigel Stewart\...` in
+the path.
 
 Unless you control the whole environment, that path is not useful at all and has always been an
 awful way of managing and finding debug symbols for debuggers.
@@ -218,31 +162,31 @@ awful way of managing and finding debug symbols for debuggers.
 ## Program Initialization
 
 OSes, when starting the program, will go through the whole list of dependencies above and load/patch
-the dynamic library. This is sometimes called the `Runtime Linker`. When the OS loads a dynamic
+the dynamic libraries. This is sometimes called the `Runtime Linker`. When the OS loads a dynamic
 library, it roughly goes through the following steps:
 
-1. Find and reads the file into memory.
+1. Find and read the file into memory.
 
     The OS has specific paths and conventions to where to look for these files and in what order.
-    There are mechanism to instruct the OS where to find (like LD_LIBRARY_PATH on Linux).
+    There are mechanisms to instruct the OS where to find them (like `LD_LIBRARY_PATH` on Linux).
 
-    Not finding these dlls will fail the start of the program. Windows will issue an image like this:
+    Not finding these dlls will prevent the program from starting. Windows will issue an image like this:
 
     {{<figure src="images/posts/dll_not_found.png" >}}
 
 2. Parse the metadata, headers and all the information needed.
 
     Here it will also do the matching between the symbols imported (needed) by the program and the
-    ones. If it cannot not, this is where you get the corrupted error. Normally this happens when
-    there is a mismatch of versions (ie. you have an old .dll). On Linux is very common to
-    have very old system libraries, so maybe your gcclib (C runtime) is too old.
+    ones exported by the library. If it cannot, this is where you get the corrupted error. Normally
+    this happens when there is a mismatch of versions (ie. you have an old .dll). On Linux it is very
+    common to have very old system libraries, so maybe your glibc (C runtime) is too old.
 
-3. Maps code section into the address space of the process.
+3. Map the code sections into the address space of the process.
 
-   These pages will be most likely be marked as read-only, executable memory pages.
+   These pages will most likely be marked as read-only, executable memory pages.
    This is where the memory savings come from. Since most programs reuse a lot of system libraries,
    the OS can load them once into memory and simply map those memory pages into your process, thus
-   having one copy of them in resident memory, regardless of how many processes it is running.
+   having one copy of them in resident memory, regardless of how many processes are running.
 
 4. Perform the relocations:
 
@@ -275,25 +219,26 @@ Once we have the library loaded, we can perform queries into it, again using fun
 by the OS. On Windows, the function is [GetProcAddress](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress)
 (or [SDL_LoadFunction](https://wiki.libsdl.org/SDL3/SDL_LoadFunction)). This returns the pointer to
 the function associated with that name. If you know the function signature, you can cast that
-function pointer and call in into the library.
+function pointer and call into the library.
 
 
 {{<admonition note>}}
-See how we get the function name by string? This is where the `export "C"` nonsense comes from.
+See how we get the function name by string? This is where the `extern "C"` nonsense comes from.
 
 Because C++ could not get its shit together, each compiler "mangles" (aka. makes up) symbol names in
 a different way, meaning that there is no good standard way of finding these functions. So people
 just say to the C++ compiler: for the following functions, don't do your normal bullshit and export
-the C names so we can query them in sane manner.
+the C names so we can query them in a sane manner.
 {{</admonition>}}
 
-{{<admonition note>}}
-These is a whole story here about ABI (Application Binary Interface). Since we are calling function
-pointers, we assume that they were compiled with the same convention. You cannot load a DLL compiled
-with GCC and expect it to work with a program compiled with MSVC. Even though both are valid Windows
-programs, they do not use registers in the same way, thus the arguments one side uses will not match
-the expectations of the other.
-{{</admonition>}}
+## Parting words
 
+There is a whole story here about [ABI (Application Binary Interface)](https://en.wikipedia.org/wiki/Application_binary_interface).
+Since we are calling function pointers, we assume that they were compiled with the same convention
+(aka. we use the same machine registers for arguments, return values, etc.). You cannot simply load
+a DLL compiled with GCC and expect it to work with a program compiled with MSVC. Even though both
+are completely valid Windows programs, they do not use registers in the same way, thus the arguments
+one side uses will not match the expectations of the other.
 
-
+In the next installment I will explain how to use this knowledge to reliably do "hot code reload",
+where a program reloads its code while running, similar to what scripting systems do.
